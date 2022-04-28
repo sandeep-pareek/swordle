@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import json, random
 import requests
 from colored import fg, bg, attr
@@ -18,7 +20,7 @@ def print_swordle(w):
             if (r.find(ww) == wr.find(ww)):
                 # print("match of index " + ww)
                 print('%s%s {0} %s'.format(ww) % (fg('white'), bg(28), attr('reset')) , end = " ")
-            elif (r.find(ww) >0):
+            elif (r.find(ww) >=0):
                 # print("char found in word!! " + ww)
                 print('%s%s {0} %s'.format(ww) % (fg('white'), bg(11), attr('reset')) , end = " ")
             else:
