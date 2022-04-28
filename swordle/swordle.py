@@ -32,6 +32,22 @@ def print_swordle(w):
 def rem(string):
     return "".join(string.split())
 
+def validWord(w):
+    tf = open("words.txt", "r")
+    fc = tf.read()
+    # just to handle if there are lower case letters returned from file, eg treat
+    cl = [x.lower() for x in fc.split("\n")]
+    tf.close()
+    # print("The list is: ", cl)
+
+    if (w in cl):
+        # print("found")
+        return True
+    else:
+        # print("not found")
+        return False
+
+
 found = False
 swordle = []
 i = 1
@@ -40,9 +56,9 @@ while(True):
     if (i>6):
         break
     w1 = input("Enter swordle {0} ".format(str(i)))
-    if(len(rem(w1).strip()) !=5):
+    if(len(rem(w1).strip()) !=5 or not validWord(w1)):
         # i=i-1
-        print("Plese enter correct input, without spaces, and of 5 chars")
+        print("Plese enter valid englist dictionary word, without spaces and of 5 chars")
         continue
     
     # print(w1)
