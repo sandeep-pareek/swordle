@@ -3,76 +3,84 @@
 import json, random
 import requests
 from colored import fg, bg, attr
+import enum
+from typing import Counter
 
-rr = requests.get("https://api.datamuse.com/words?sp=?????")
-w = json.loads(rr.text)
+class Color(enum.Enum):
+    grey = 242
+    yellow = 11
+    green = 28
 
-r = random.choice([k['word'] for k in w])
-# print("Random 5 digit valid english word is : "+r)
+def compare_words(r,w1):
+    fr = [{'char':l, 'state': Color.grey} for l in w1]
 
-def print_swordle(w):
-    for wr in w:
-        fw =''
-        # ll = ''.join(map(str, wr))
-        ll = [f for f in wr]
-        # print(ll)
-        for ww in ll:
-            if (r.find(ww) == wr.find(ww)):
-                # print("match of index " + ww)
-                print('%s%s {0} %s'.format(ww) % (fg('white'), bg(28), attr('reset')) , end = " ")
-            elif (r.find(ww) >=0):
-                # print("char found in word!! " + ww)
-                print('%s%s {0} %s'.format(ww) % (fg('white'), bg(11), attr('reset')) , end = " ")
-            else:
-                # print("greyed oout:: " + ww)
-                print('%s%s {0} %s'.format(ww) % (fg('white'), bg(242), attr('reset')) , end = " ")
+    ly = Counter(r)
 
-        print(fw)
+    for rr, rl, c in zip(fr, r, w1):
+        if rl == c:
+            rr['state'] = Color.green
+            ly[rl] -= 1
+
+    for rr, c in zip(fr, w1):
+        if (c in ly and ly[c] > 0):
+            rr['state'] = Color.yellow
+            ly[c] -= 1
+
+    return fr
+
+def display_swordle(wordle):
+    for word in wordle:
+        for char in word:
+            print('%s%s {0} %s'.format(char.get('char')) 
+            % (fg('white'), bg(char.get("state").value), attr('reset')) , end = " ")
+        print()
 
 def rem(string):
     return "".join(string.split())
 
-def validWord(w):
+def valid_word(w, vw):
+    # tf = open("/usr/share/dict/words", "r")
     tf = open("words.txt", "r")
     fc = tf.read()
     # just to handle if there are lower case letters returned from file, eg treat
     cl = [x.lower() for x in fc.split("\n")]
     tf.close()
-    # print("The list is: ", cl)
 
-    if (w in cl):
-        # print("found")
+    if (w in cl and w not in vw):
         return True
     else:
-        # print("not found")
         return False
 
+if __name__ == "__main__":
+    rr = requests.get("https://api.datamuse.com/words?sp=?????")
+    w = json.loads(rr.text)
+    r = random.choice([k['word'] for k in w])
+    # print("Random 5 digit valid english word is : "+r)
 
-found = False
-swordle = []
-i = 1
-while(True):
-    # print(i)
-    if (i>6):
-        break
-    w1 = input("Enter swordle {0} ".format(str(i)))
-    if(len(rem(w1).strip()) !=5 or not validWord(w1)):
-        # i=i-1
-        print("Plese enter valid englist dictionary word, without spaces and of 5 chars")
-        continue
-    
-    # print(w1)
-    swordle.append(w1)
-    if (w1 == r):
-        found = True
-        a = i
-        break
+    found = False
+    swordle = []
+    aw = []
+
+    i = 1
+    while(True):
+        if (i>6):
+            break
+        w1 = input("Enter swordle {0} ".format(str(i)))
+        if(len(rem(w1).strip()) !=5 or not valid_word(w1, aw)):
+            print("Please enter a valid non-repeated 5 letter english dictionary word, without spaces")
+            continue
+        
+        fr = compare_words(r, w1)
+        swordle.append(fr)
+        aw.append(w1)
+        display_swordle(swordle)
+        if (w1 == r):
+            found = True
+            a = i
+            break
+        i=i+1
+
+    if (found):
+        print("Viola!! Word '{0}' found in {1} attempts!!".format(r, a))
     else:
-        print_swordle(swordle)
-    i=i+1
-
-if (found):
-    print_swordle(swordle)
-    print("Viola!! Word '{0}' found in {1} attempts!!".format(r, a))
-else:
-    print("Was that so difficult? :-D " + r)
+        print("Was '{0}' so difficult? :-D ".format(r))
