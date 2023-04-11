@@ -39,7 +39,6 @@ def rem(string):
     return "".join(string.split())
 
 def valid_word(w, vw):
-    # tf = open("/usr/share/dict/words", "r")
     tf = open("words.txt", "r")
     fc = tf.read()
     # just to handle if there are lower case letters returned from file, eg treat
@@ -55,7 +54,6 @@ if __name__ == "__main__":
     rr = requests.get("https://api.datamuse.com/words?sp=?????")
     w = json.loads(rr.text)
     r = random.choice([k['word'] for k in w])
-    # print("Random 5 digit valid english word is : "+r)
 
     found = False
     swordle = []
